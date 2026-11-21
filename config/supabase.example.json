@@ -1,0 +1,4 @@
+{
+  "SUPABASE_URL": "https://<project-ref>.supabase.co",
+  "SUPABASE_ANON_KEY": "<public anon key: node --env-file=.env scripts/app-env.mjs in the backend repo writes this file>"
+}

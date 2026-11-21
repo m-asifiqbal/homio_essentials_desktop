@@ -1,0 +1,732 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { --bf-ctrl-h: 2.75rem; --bf-green: #0f6b50; --bf-green-hover: #0b5a43; --bf-ease: cubic-bezier(.22, 1, .36, 1); }
+  body {
+    @apply bg-daybg text-slate-900 antialiased overflow-x-hidden selection:bg-accent-800 selection:text-white;
+  }
+
+  /* Dark mode root styles */
+  .dark body,
+  .dark {
+    @apply bg-night-0b1317 text-slate-100;
+    color-scheme: dark;
+  }
+}
+
+/* The app shell fills the window exactly; only <main> scrolls. Nothing may stretch the page itself. */
+@media screen {
+  html, body, #root { height: 100%; overflow: hidden; }
+}
+
+/* Custom UI Component Classes */
+@layer components {
+  /* High contrast card that will NEVER melt down */
+  .card-base {
+    @apply bg-white dark:bg-night-142026 rounded-2xl border border-slate-200/90 dark:border-night-22353f shadow-[0_2px_8px_rgba(15,74,60,0.04)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] transition-shadow;
+  }
+
+  /* Form controls: always outlined (1.5px) so shape and position are obvious; one shared height. */
+  .form-input, .form-select {
+    @apply w-full px-3.5 bg-white dark:bg-night-101b21 border-[1.5px] border-[#a9b7c3] dark:border-night-3a5463 rounded-xl text-[13px] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 font-medium shadow-[inset_0_1px_0_rgba(255,255,255,.6),0_1px_2px_rgba(15,23,42,.04)] hover:border-[#7f93a3] dark:hover:border-[#52717f] focus:outline-none focus:border-accent-600 dark:focus:border-accent-400 focus:ring-[3px] focus:ring-accent-600/15 dark:focus:ring-accent-400/20;
+    height: var(--bf-ctrl-h);
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+  }
+  textarea.form-input { height: auto; min-height: 5.5rem; padding-top: .7rem; padding-bottom: .7rem; line-height: 1.5; }
+  .form-select { @apply font-semibold cursor-pointer; }
+  .form-input:disabled, .form-select:disabled { @apply bg-slate-100 dark:bg-night-0f1a20 text-slate-500 cursor-not-allowed; }
+  .form-input[aria-invalid="true"], .form-input.is-invalid { @apply border-rose-400 focus:border-rose-500 focus:ring-rose-500/15; }
+
+  /* Deep, clear form label */
+  .form-label {
+    @apply block text-slate-800 dark:text-slate-200 font-bold text-xs mb-1.5;
+  }
+
+  /* Deep, legible form hint */
+  .form-hint {
+    @apply text-slate-600 dark:text-slate-400 font-medium text-[11px] leading-relaxed mt-1 block;
+  }
+}
+
+/* Slim scrollbar: 4px thumb on a transparent track (10px hit area), 6px on hover. */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c5cfd8; border-radius: 9999px; border: 3px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: #8ea0af; border-width: 2px; }
+.dark ::-webkit-scrollbar-thumb { background: rgb(var(--nt-2e4553)); background-clip: content-box; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #4a6a7d; background-clip: content-box; }
+
+/* Smooth transitions */
+/* Only cheap properties transition (`all` caused layout work on every hover). */
+button, a, input, select, textarea {
+  transition: color .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+
+
+/* ------------------------------------------------------------------ */
+/* Print / PDF export (Reports). savePdf() prints the current window.  */
+/* ------------------------------------------------------------------ */
+.print-only { display: none; }
+
+@media print {
+  @page { size: A4; margin: 12mm 10mm; }
+
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+
+  html, body, #root {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Let the app shell grow so every page of the report prints */
+  .h-screen, .overflow-hidden, .overflow-y-auto, .overflow-x-auto, main {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .report-page { padding: 0 !important; max-width: none !important; margin: 0 !important; }
+
+  #report-print-area {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+  #report-print-area,
+  #report-print-area * {
+    color: #000 !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+  .dark #report-print-area * { background-color: transparent !important; }
+  #report-print-area h2 { color: #0f4a3c !important; }
+  #report-print-area .report-summary > div { background: #f8fafc !important; break-inside: avoid; }
+  #report-print-area .report-table-wrap { border-radius: 0 !important; }
+  #report-print-area .report-table { font-size: 9px !important; }
+  #report-print-area .report-table th,
+  #report-print-area .report-table td { padding: 3px 5px !important; }
+  #report-print-area .report-table thead tr { background: #e6f3ee !important; }
+  #report-print-area .report-table tfoot tr { background: #f1f5f9 !important; }
+  #report-print-area .report-table tbody tr { background: #fff !important; }
+  thead { display: table-header-group; }
+  tfoot { display: table-row-group; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  .report-section { break-before: auto; }
+}
+
+/* ---------------------------------------------------------------------------
+   Design system v2: buttons, dialogs, segmented tabs, motion
+   Rules: save / confirm = solid green + white text · cancel / close = red outline + red text
+          every other action = outlined (never a bare, border-less button).
+   --------------------------------------------------------------------------- */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap select-none cursor-pointer rounded-xl border-[1.5px] border-transparent px-4 text-[13px] font-bold leading-none;
+    height: 2.5rem;
+    transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .2s ease, transform .14s var(--bf-ease);
+  }
+  .btn:not(:disabled):hover { transform: translateY(-1px); }
+  .btn:not(:disabled):active { transform: translateY(0) scale(.97); transition-duration: .06s; }
+  .btn:focus-visible { @apply outline-none; box-shadow: 0 0 0 3px rgba(var(--ring), .35); }
+  .btn:disabled { @apply opacity-50 cursor-not-allowed; }
+  .btn > svg { @apply shrink-0; transition: transform .2s var(--bf-ease); }
+  .btn:not(:disabled):hover > svg:first-child { transform: scale(1.08); }
+
+  /* Save / confirm: solid green, white text */
+  .btn-primary { background: var(--bf-green); border-color: var(--bf-green); color: #fff; box-shadow: 0 1px 2px rgba(var(--bf-glow), .3); }
+  .btn-primary:not(:disabled):hover { background: var(--bf-green-hover); border-color: var(--bf-green-hover); box-shadow: 0 6px 14px -4px rgba(var(--bf-glow), .45); }
+  .dark .btn-primary { background: var(--bf-green-night); border-color: var(--bf-green-night); }
+  .dark .btn-primary:not(:disabled):hover { background: var(--bf-green-night-hover); border-color: var(--bf-green-night-hover); }
+
+  /* Cancel / close: red outline, red text */
+  .btn-cancel { @apply bg-white dark:bg-transparent text-rose-600 dark:text-rose-400; border-color: #fb7185; }
+  .btn-cancel:not(:disabled):hover { @apply bg-rose-50 dark:bg-rose-950/40; border-color: #e11d48; box-shadow: 0 4px 12px -4px rgba(225, 29, 72, .3); }
+  .dark .btn-cancel { border-color: #be3a55; }
+
+  /* Destructive confirm (delete / void): solid red, white text */
+  .btn-danger { background: #e11d48; border-color: #e11d48; color: #fff; box-shadow: 0 1px 2px rgba(225, 29, 72, .3); }
+  .btn-danger:not(:disabled):hover { background: #be123c; border-color: #be123c; box-shadow: 0 6px 14px -4px rgba(225, 29, 72, .45); }
+
+  /* Everything else: neutral outline */
+  .btn-outline { @apply bg-white dark:bg-night-16252d text-slate-700 dark:text-slate-200; border-color: #a9b7c3; }
+  .dark .btn-outline { border-color: rgb(var(--nt-3a5463)); }
+  .btn-outline:not(:disabled):hover { @apply bg-slate-50 dark:bg-night-1b2c34; border-color: #64788a; box-shadow: 0 4px 12px -6px rgba(15, 23, 42, .25); }
+
+  /* Outlined in green: positive secondary actions (view, download, open) */
+  .btn-green-outline { @apply bg-white dark:bg-transparent text-accent-600 dark:text-accent-400; border-color: rgb(var(--ac-400)); }
+  .btn-green-outline:not(:disabled):hover { @apply bg-accent-50 dark:bg-accent-950/40; border-color: var(--bf-green); }
+
+  /* Outlined in red: destructive secondary actions (delete icon, void) */
+  .btn-danger-outline { @apply bg-white dark:bg-transparent text-rose-600 dark:text-rose-400; border-color: #fda4af; }
+  .btn-danger-outline:not(:disabled):hover { @apply bg-rose-50 dark:bg-rose-950/40; border-color: #e11d48; }
+
+  .btn-sm { @apply px-3 text-xs; height: 2rem; border-radius: .39rem; }
+  .btn-icon { @apply px-0; width: 2rem; height: 2rem; border-radius: .39rem; }
+  .btn-icon.btn-md { width: 2.5rem; height: 2.5rem; }
+  .btn-lg { @apply px-6 text-sm; height: 3rem; border-radius: .54rem; }
+  .btn-block { @apply w-full; }
+
+  /* Old names kept so existing markup keeps working */
+  .btn-primary-modal { @apply btn btn-primary; }
+  .btn-secondary-modal { @apply btn btn-cancel; }
+}
+
+/* ---- Dialogs --------------------------------------------------------------- */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+  background: rgba(226, 232, 240, 0.6);
+  backdrop-filter: blur(7px) saturate(1.1);
+  animation: bf-fade .2s ease-out both;
+}
+.dark .modal-backdrop { background: rgba(5, 11, 14, 0.62); }
+.modal-panel:focus, .modal-panel:focus-visible { outline: none; }
+.modal-panel {
+  display: flex; flex-direction: column; max-height: calc(100vh - 2rem);
+  background: #fff; border: 1px solid rgb(226 232 240); border-radius: 1.1875rem;
+  box-shadow: 0 32px 80px -16px rgba(15, 23, 42, 0.3), 0 4px 14px rgba(15, 23, 42, 0.07);
+  animation: bf-pop .32s var(--bf-ease) both;
+  outline: none;
+}
+.dark .modal-panel { background: rgb(var(--nt-142026)); border-color: rgb(var(--nt-22353f)); box-shadow: 0 32px 80px -16px rgba(0, 0, 0, 0.75); }
+.modal-backdrop[data-closing] { animation: bf-fade-out .16s ease-in both; }
+.modal-backdrop[data-closing] .modal-panel { animation: bf-pop-out .16s ease-in both; }
+
+/* Close button: red outline + red cross. Deliberately static: no transitions, rotation or press-scale, so it looks and behaves
+   the same on every PC (the animation did not play on some machines). Hover only changes the colours, instantly. */
+.modal-close {
+  display: grid; place-items: center; width: 2.25rem; height: 2.25rem; flex-shrink: 0;
+  border-radius: .4375rem; border: 1.5px solid #fb7185; color: #e11d48; background: transparent;
+  transition: none; animation: none;
+}
+.modal-close svg { transition: none; transform: none; }
+.modal-close:hover { background: #fff1f2; border-color: #e11d48; }
+.modal-close:hover svg, .modal-close:active, .modal-close:active svg { transform: none; }
+.modal-close:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(225, 29, 72, .3); }
+.dark .modal-close { color: #fb7185; border-color: #9f3347; }
+.dark .modal-close:hover { background: rgba(225, 29, 72, .14); border-color: #fb7185; }
+
+.animate-pop { animation: bf-pop .18s var(--bf-ease) both; }
+@keyframes bf-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes bf-fade-out { from { opacity: 1 } to { opacity: 0 } }
+@keyframes bf-pop { from { opacity: 0; transform: translateY(14px) scale(.965) } to { opacity: 1; transform: none } }
+@keyframes bf-pop-out { from { opacity: 1; transform: none } to { opacity: 0; transform: translateY(8px) scale(.975) } }
+
+@layer components {
+/* ---- Segmented tabs (sliding solid-green selection) ---------------------------
+   Concentric corners: inner radius = outer radius - border - padding, so the pill follows the track exactly. */
+.seg {
+  --seg-r: .6875rem; --seg-bw: 1.5px; --seg-p: .25rem; --seg-ri: calc(var(--seg-r) - var(--seg-bw) - var(--seg-p));
+  position: relative; display: inline-flex; align-items: stretch; max-width: 100%; overflow-x: auto; padding: var(--seg-p); gap: 0;
+  border-radius: var(--seg-r); border: var(--seg-bw) solid var(--seg-line, #cfd9d4); background: var(--seg-track, #f3f7f5); scrollbar-width: none;
+}
+.seg::-webkit-scrollbar { display: none; }
+.dark .seg { border-color: rgb(var(--nt-2a3f49)); background: rgb(var(--nt-101b21)); }
+.seg-ind {
+  position: absolute; top: var(--seg-p); bottom: var(--seg-p); left: 0; border-radius: var(--seg-ri); pointer-events: none;
+  background: var(--bf-green); box-shadow: 0 4px 12px -3px rgba(var(--bf-glow), .55), inset 0 1px 0 rgba(255, 255, 255, .18);
+  transition: transform .38s var(--bf-ease), width .38s var(--bf-ease), opacity .2s ease; will-change: transform, width;
+}
+.dark .seg-ind { background: var(--bf-green-night); box-shadow: 0 4px 12px -3px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .15); }
+.seg-btn {
+  position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: .5rem; white-space: nowrap;
+  padding: 0 1rem; min-height: 2.25rem; border-radius: var(--seg-ri); font-size: .8rem; font-weight: 700; color: #4b5d6b; background: transparent;
+  transition: color .22s ease, transform .14s var(--bf-ease);
+}
+.dark .seg-btn { color: #9db0bd; }
+.seg-btn:hover:not([aria-selected="true"]) { color: #0f172a; }
+.dark .seg-btn:hover:not([aria-selected="true"]) { color: #fff; }
+.seg-btn[aria-selected="true"] { color: #fff; }
+.seg-btn:active { transform: scale(.96); }
+.seg-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(var(--ring), .4); }
+.seg-btn svg { transition: transform .3s var(--bf-ease); }
+.seg-btn[aria-selected="true"] svg { transform: scale(1.12); }
+.seg-count { display: inline-flex; align-items: center; justify-content: center; min-width: 1.35rem; height: 1.35rem; padding: 0 .35rem; border-radius: 999px;
+  font-size: .68rem; font-weight: 800; background: rgba(100, 116, 139, .14); transition: background-color .22s ease, color .22s ease, transform .3s var(--bf-ease); }
+.seg-btn[aria-selected="true"] .seg-count { background: rgba(255, 255, 255, .24); color: #fff; transform: scale(1.06); }
+.seg-sm { --seg-r: .5625rem; }
+.seg-sm .seg-btn { min-height: 1.9rem; padding: 0 .75rem; font-size: .72rem; }
+}
+
+/* ---- Global micro-interactions --------------------------------------------- */
+button:not(:disabled), [role="button"] { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid rgba(var(--ring), .55); outline-offset: 2px; }
+input:focus-visible, textarea:focus-visible, select:focus-visible, .seg-btn:focus-visible, .btn:focus-visible, .modal-close:focus-visible { outline: none; }
+.card-base { transition: box-shadow .22s ease, transform .22s var(--bf-ease), border-color .2s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop, .modal-panel, .animate-pop { animation: none !important; }
+  .btn, .seg-ind, .seg-btn, .modal-close, .modal-close svg, .card-base { transition: none !important; }
+}
+
+/* Bangla: Bengali-first font stack and a little more line height so conjuncts don't clip. */
+html[lang="bn"] body { font-family: 'Hind Siliguri', 'Plus Jakarta Sans', system-ui, sans-serif; }
+/* Letter-spacing splits Bangla conjuncts and vowel signs apart; uppercase does nothing for Bangla. */
+html[lang="bn"] body * { letter-spacing: normal !important; }
+html[lang="bn"] body :where(p, span, label, td, th, li, button, h1, h2, h3, h4) { line-height: 1.55; }
+
+/* ---- Compact table density (un-layered so it wins over utilities) ------------- */
+/* Row actions: small square buttons with a soft 2dp elevation */
+.btn-act, main table .btn-icon {
+  width: 1.75rem; height: 1.75rem; min-width: 1.75rem; padding: 0; border-radius: .24rem;
+  box-shadow: 0 2px 2px rgba(15, 23, 42, .12), 0 3px 1px -2px rgba(15, 23, 42, .10), 0 1px 5px rgba(15, 23, 42, .16);
+}
+.dark .btn-act, .dark main table .btn-icon { box-shadow: 0 2px 2px rgba(0, 0, 0, .35), 0 3px 1px -2px rgba(0, 0, 0, .3), 0 1px 5px rgba(0, 0, 0, .4); }
+.btn-act:not(:disabled):hover, main table .btn-icon:not(:disabled):hover {
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, .18), 0 2px 4px -2px rgba(15, 23, 42, .14);
+}
+.btn-act svg, main table .btn-icon svg { width: 13px; height: 13px; }
+/* Segmented tabs: slightly wider pills, same height */
+.seg-btn { padding-left: 1.4rem; padding-right: 1.4rem; min-width: 5.25rem; }
+.seg-sm .seg-btn { padding-left: 1.1rem; padding-right: 1.1rem; min-width: 4.25rem; }
+/* Confirmation dialog buttons: 2px shorter */
+.modal-footer-confirm .btn { height: calc(2.5rem - 2px); }
+
+/* ---- Sidebar navigation: gliding selection pill ------------------------------ */
+/* Homio look: a soft tinted pill with a teal bar at the start (the design canvas' sidebar), gliding like bondhu-fund's. */
+.nav-ind {
+  position: absolute; left: .75rem; right: .75rem; top: 0; border-radius: .75rem; pointer-events: none; z-index: 0;
+  background: rgb(var(--ac-100));
+  box-shadow: inset 3px 0 0 rgb(var(--ac-600)), 0 6px 14px -10px rgba(var(--bf-glow), .55);
+  will-change: transform, height;
+}
+.nav-ind-anim { transition: transform .45s var(--bf-ease), height .3s var(--bf-ease), opacity .2s ease; }
+.dark .nav-ind { background: rgb(var(--ac-400) / .16); box-shadow: inset 3px 0 0 rgb(var(--ac-400)), 0 6px 16px -8px rgba(0, 0, 0, .6); }
+.nav-item { transition: color .22s ease, background-color .2s ease, transform .2s var(--bf-ease); }
+.nav-item:not(.nav-item-active):hover { background: var(--nav-hover); color: #0f172a; transform: translateX(3px); }
+.dark .nav-item:not(.nav-item-active):hover { background: rgba(255, 255, 255, .07); color: #fff; }
+.nav-item:not(.nav-item-active):active { transform: translateX(1px) scale(.98); }
+.nav-item-active { color: rgb(var(--ac-800)); }
+.dark .nav-item-active { color: rgb(var(--ac-200)); }
+.nav-icon { transition: transform .3s var(--bf-ease); }
+.nav-item:hover .nav-icon { transform: scale(1.12); }
+.nav-item-active .nav-icon { animation: nav-icon-pop .45s var(--bf-ease); }
+@keyframes nav-icon-pop { 0% { transform: scale(.7) rotate(-12deg); } 60% { transform: scale(1.22) rotate(4deg); } 100% { transform: scale(1) rotate(0); } }
+.nav-item-active > span { animation: nav-label-in .35s var(--bf-ease); }
+@keyframes nav-label-in { from { opacity: .4; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .nav-ind-anim, .nav-item, .nav-icon { transition: none !important; } .nav-item-active .nav-icon, .nav-item-active > span { animation: none; } }
+
+/* ---- Selection chips (filters): rounded pills, each selectable on its own -------- */
+.chip {
+  display: inline-flex; align-items: center; gap: .4rem; height: 2rem; padding: 0 .9rem; border-radius: 999px; white-space: nowrap;
+  font-size: .78rem; font-weight: 700; color: #475569; background: #fff; border: 1.5px solid #c3ced8; cursor: pointer;
+  transition: background-color .22s ease, border-color .22s ease, color .22s ease, box-shadow .25s ease, transform .18s var(--bf-ease);
+}
+.dark .chip { background: transparent; color: #9db0bd; border-color: rgb(var(--nt-34505e)); }
+.chip:hover:not([aria-selected="true"]) { border-color: var(--chip-hover-line, #5fb89c); color: var(--bf-green); background: var(--chip-hover-bg, #f1faf6); transform: translateY(-1px); }
+.dark .chip:hover:not([aria-selected="true"]) { border-color: rgb(var(--ac-500)); color: #fff; background: rgba(var(--ring), .12); }
+.chip:active { transform: scale(.95); }
+.chip[aria-selected="true"] { background: var(--bf-green); border-color: var(--bf-green); color: #fff; box-shadow: 0 4px 10px -4px rgba(var(--bf-glow), .6); animation: chip-pop .3s var(--bf-ease); }
+.dark .chip[aria-selected="true"] { background: var(--bf-green-night); border-color: var(--bf-green-night); }
+.chip:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(var(--ring), .4); }
+.chip-count { display: inline-flex; align-items: center; justify-content: center; min-width: 1.25rem; height: 1.25rem; padding: 0 .35rem; border-radius: 999px;
+  font-size: .66rem; font-weight: 800; background: rgba(100, 116, 139, .16); transition: background-color .22s ease; }
+.chip[aria-selected="true"] .chip-count { background: rgba(255, 255, 255, .26); }
+@keyframes chip-pop { 0% { transform: scale(.92); } 60% { transform: scale(1.05); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .chip { transition: none !important; animation: none !important; } }
+
+/* ---- Sidebar: section spacing, collapsed icon state, readable tooltip -------------- */
+.nav-section-sep { border-top: 1px solid #e6edf2; }
+.dark .nav-section-sep { border-top-color: rgb(var(--nt-22353f)); }
+.nav-item-collapsed:not(.nav-item-active):hover { transform: scale(1.06); }
+.nav-tip {
+  position: fixed; z-index: 70; transform: translateY(-50%); pointer-events: none; white-space: nowrap;
+  padding: .55rem .95rem; border-radius: .4375rem; font-size: .931rem; font-weight: 700; letter-spacing: .01em;
+  background: rgb(var(--nt-0f1f27)); color: #fff; box-shadow: 0 10px 26px -8px rgba(0, 0, 0, .5); animation: nav-tip-in .16s var(--bf-ease);
+}
+.nav-tip::before { content: ''; position: absolute; left: -5px; top: 50%; width: 10px; height: 10px; margin-top: -5px; background: inherit; transform: rotate(45deg); border-radius: 2px; }
+.dark .nav-tip { background: #fff; color: var(--bf-green); box-shadow: 0 10px 26px -8px rgba(0, 0, 0, .8); }
+@keyframes nav-tip-in { from { opacity: 0; transform: translate(-6px, -50%); } to { opacity: 1; transform: translate(0, -50%); } }
+
+/* ---- Information cards: coloured stripe at the start (follows the rounded corner) ---- */
+.accent-purple { border-left: 4px solid #8b5cf6; }
+.accent-green { border-left: 4px solid #10b981; }
+.accent-rose { border-left: 4px solid #f43f5e; }
+.accent-blue { border-left: 4px solid #3b82f6; }
+.accent-amber { border-left: 4px solid #f59e0b; }
+.accent-teal { border-left: 4px solid #14b8a6; }
+[dir="rtl"] .accent-purple, [dir="rtl"] .accent-green, [dir="rtl"] .accent-rose, [dir="rtl"] .accent-blue, [dir="rtl"] .accent-amber, [dir="rtl"] .accent-teal { border-left-width: 1px; }
+/* the dark theme sets a card border colour with higher specificity — keep the stripe colours in dark mode too */
+.dark .accent-purple { border-left-color: #8b5cf6; }
+.dark .accent-green { border-left-color: #10b981; }
+.dark .accent-rose { border-left-color: #f43f5e; }
+.dark .accent-blue { border-left-color: #3b82f6; }
+.dark .accent-amber { border-left-color: #f59e0b; }
+.dark .accent-teal { border-left-color: #14b8a6; }
+
+/* ---- Table action icon tooltip (same style as the collapsed sidebar labels) ---- */
+.act-tip {
+  position: fixed; z-index: 70; transform: translate(-50%, calc(-100% - 12px)); pointer-events: none; white-space: nowrap;
+  padding: .4rem .7rem; border-radius: .29rem; font-size: .7rem; font-weight: 700; letter-spacing: .01em;
+  background: rgb(var(--nt-0f1f27)); color: #fff; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .5); animation: act-tip-in .16s var(--bf-ease);
+}
+.act-tip::before { content: ''; position: absolute; left: 50%; bottom: -5px; width: 10px; height: 10px; margin-left: -5px; background: inherit; transform: rotate(45deg); border-radius: 2px; }
+.act-tip-below { transform: translate(-50%, 12px); }
+.act-tip-below::before { bottom: auto; top: -5px; }
+.dark .act-tip { background: #fff; color: var(--bf-green); box-shadow: 0 10px 26px -8px rgba(0, 0, 0, .8); }
+@keyframes act-tip-in { from { opacity: 0; margin-top: 4px; } to { opacity: 1; margin-top: 0; } }
+/* sticky member columns (Members table) */
+.sticky-col-edge { box-shadow: 8px 0 8px -8px rgba(15, 23, 42, .22); }
+.dark .sticky-col-edge { box-shadow: 8px 0 8px -8px rgba(0, 0, 0, .6); }
+
+@media print { .print-only.sig-flex { display: flex !important; } }
+
+/* ---- Money fields: currency symbol at the start, no spinner arrows on any number field ---- */
+input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.money-field { position: relative; display: block; }
+.money-field .money-prefix { position: absolute; left: .95rem; top: 50%; transform: translateY(-50%); font-weight: 800; font-size: .8rem; color: #64748b; pointer-events: none; letter-spacing: .02em; }
+.dark .money-field .money-prefix { color: #94a3b8; }
+.money-field input.money-input { padding-left: 3.1rem; }
+
+/* ---- one-click clear (×) at the end of every editable text field ---- */
+.clear-x {
+  width: 1.3rem; height: 1.3rem; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px;
+  background: #e2e8f0; color: #475569; border: 0; cursor: pointer; animation: clear-in .14s var(--bf-ease);
+  transition: background-color .15s ease, color .15s ease, transform .15s var(--bf-ease);
+}
+.clear-x:hover { background: #fecdd3; color: #be123c; }
+.clear-x:active { transform: translateY(-50%) scale(.88) !important; }
+.dark .clear-x { background: rgb(var(--nt-2a3f49)); color: #cbd5e1; }
+.dark .clear-x:hover { background: #7f1d3a; color: #fecdd3; }
+@keyframes clear-in { from { opacity: 0; } to { opacity: 1; } }
+/* room for the × so typed text never runs under it */
+input.form-input:not([readonly]):not(:disabled):not([type=checkbox]):not([type=radio]), textarea.form-input:not([readonly]):not(:disabled) { padding-right: 3rem; }
+[data-clear-offset] { padding-right: 5.8rem !important; }
+
+/* ---- Interface sizing ------------------------------------------------------
+   The window is zoomed to 0.9765 (electron/main.ts) → all text, tables and controls are 5% larger than before.
+   Summary cards grow only 3% (1.03 / 1.05) and the sign-in form 6% (1.06 / 1.05). */
+@media screen {
+  .kpi-zoom { zoom: 0.981; }
+  .login-zoom { zoom: 1.0095; }
+}
+
+/* ---- Table headers & filter bars: a clearly visible mint tint in day mode ---------- */
+html:not(.dark) main table thead th,
+html:not(.dark) main table thead tr { background-color: var(--tbl-head, #d9eadf); color: var(--tbl-head-text, #1f4a3a); }
+html:not(.dark) main table thead { border-bottom: 1.5px solid var(--tbl-head-line, #a8cbb8); }
+html:not(.dark) main .tbl-filter { background-color: var(--tbl-filter, #ecf5f0); border-color: var(--tbl-filter-line, #bcd7c8); }
+
+/* ---- Sidebar open/collapse tab: a small round button sitting on the sidebar's edge ---- */
+.sidebar-edge-toggle {
+  position: absolute; right: -0.75rem; top: 1.25rem; z-index: 60;
+  width: 1.5rem; height: 1.5rem; border-radius: 9999px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: rgb(var(--ac-800)); background: #fff; border: 1.5px solid var(--edge-line, #b9cfc4); cursor: pointer;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, .18);
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.sidebar-edge-toggle:hover { background: rgb(var(--ac-800)); color: #fff; border-color: rgb(var(--ac-800)); }
+.sidebar-edge-toggle:focus-visible { outline: 2px solid rgb(var(--ac-500)); outline-offset: 2px; }
+.dark .sidebar-edge-toggle { color: rgb(var(--ac-300)); background: rgb(var(--nt-16252d)); border-color: rgb(var(--nt-2f4a58)); box-shadow: 0 2px 8px rgba(0, 0, 0, .55); }
+.dark .sidebar-edge-toggle:hover { background: rgb(var(--ac-400)); color: rgb(var(--ac-950)); border-color: rgb(var(--ac-400)); }
+@media print { .sidebar-edge-toggle { display: none !important; } }
+
+/* ---- Tables: text and headers 3% larger (on top of the interface scale) ---------- */
+@media screen {
+  main table { zoom: 1.03; }
+  /* the smallest table text is nudged up one step: headers 11px, captions 12px, tags 10px */
+  main table thead th { font-size: 11px; }
+  main table .text-\[11px\] { font-size: 12px; }
+  main table .text-\[10px\] { font-size: 11px; }
+  main table .text-\[9px\] { font-size: 10px; }
+  /* Bangla has no capitals: headers are set a step larger and bolder so they stay as clear as the English ones */
+  html[lang="bn"] main table thead th { font-size: 12.5px; font-weight: 800; }
+}
+
+/* ---- Table rows: alternate shading, clear hover and a prominent selected row -------- */
+:root { --ralt: var(--row-alt, #f4f9f6); --rhov: var(--row-hover, #dcece3); --rsel: var(--row-sel, #bfe3d0); --rbar: var(--row-sel-bar, #0f4a3c); }
+.dark { --ralt: var(--row-alt-n, rgb(var(--nt-182830))); --rhov: var(--row-hover-n, rgb(var(--nt-243d48))); --rsel: var(--row-sel-n, #1f5a47); --rbar: var(--row-sel-bar-n, #34d399); }
+@media screen {
+  main table tbody tr:nth-child(even):not(:has(> td[colspan])) > td { background-color: var(--ralt); }
+  main table tbody tr:not(:has(> td[colspan])):hover > td { background-color: var(--rhov) !important; }
+  main table tbody tr[data-selected] > td { background-color: var(--rsel) !important; }
+  main table tbody tr[data-selected] > td:first-child { box-shadow: inset 5px 0 0 var(--rbar); }
+  main table tbody tr[data-selected] > td { font-weight: 600; }
+}
+
+/* ---- Filter bars: search box, drop-downs, date pickers and buttons share one height ---- */
+.tbl-filter .form-input, .tbl-filter .form-select, .tbl-filter .btn { height: 38px; min-height: 38px; font-size: .75rem; }
+.tbl-filter .form-input { padding-top: 0; padding-bottom: 0; }
+
+/* ---- Sidebar open / collapse: one smooth motion --------------------------------------
+   The same elements exist in both states. Only the width glides; labels and section titles fade and
+   fold away inside it (never re-wrap or pop), so nothing jumps while it moves. */
+.sb { width: 16rem; transition: width .34s var(--bf-ease); }
+.sb.sb-collapsed { width: 5rem; }
+.sb-label { white-space: nowrap; opacity: 1; transition: opacity .2s ease .14s; }
+.sb-collapsed .sb-label { opacity: 0; transition: opacity .1s ease; }
+.sb-sec { height: 1.5rem; overflow: hidden; opacity: 1; transition: height .34s var(--bf-ease), opacity .2s ease .14s; }
+.sb-collapsed .sb-sec { height: 0; opacity: 0; transition: height .34s var(--bf-ease), opacity .1s ease; }
+@media (prefers-reduced-motion: reduce) { .sb, .sb-label, .sb-sec { transition: none !important; } }
+
+/* ---- Filter bars: every search box and every drop-down has the same width on every screen ---- */
+.filter-search { flex: 0 1 26rem; width: 26rem; min-width: 14rem; max-width: 100%; }
+.filter-select { flex: 0 0 13rem; width: 13rem; min-width: 0; max-width: 100%; }
+
+/* The sidebar list scrolls with the wheel but shows no scrollbar: a 9px bar squeezed the highlight off-centre in the narrow rail. */
+.nav-scroll { scrollbar-width: none; }
+.nav-scroll::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* Pages the user may only view: the main "create" buttons are hidden (the main process refuses changes anyway) */
+main.view-only .btn-primary, main.view-only .btn-danger-outline { display: none !important; }
+
+/* Google Drive panel: the progress bar glides while a step has no measurable percentage (an upload), so it never looks stuck */
+@keyframes bf-glide { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+.bf-bar-glide { background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.38) 50%, rgba(255,255,255,0) 100%); background-size: 200% 100%; animation: bf-glide 1.6s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .bf-bar-glide { animation: none; } }
+
+/* =============================================================================================================
+   Motion system. One easing curve, short durations, motion only on enter / state change (never idle loops).
+   --bf-ease: smooth deceleration for entrances.  --bf-spring: a small overshoot for things that "land" (dialogs, toasts).
+   Everything here is switched off by the user's "reduce motion" setting (see the end of this block).
+   ============================================================================================================= */
+:root { --bf-spring: cubic-bezier(.22, 1.18, .36, 1); --bf-out: cubic-bezier(.2, .7, .2, 1); --bf-in: cubic-bezier(.4, 0, 1, 1); --t-fast: 120ms; --t-base: 200ms; }
+
+/* colours glide when the theme or night mode changes (class is added for half a second only) */
+html.theme-fade, html.theme-fade *, html.theme-fade *::before, html.theme-fade *::after {
+  transition: background-color .42s ease, border-color .42s ease, color .35s ease, fill .42s ease, stroke .42s ease, box-shadow .42s ease !important;
+}
+
+/* a screen arrives: the page eases up, then its blocks follow one after another */
+.view-enter { animation: view-in .3s var(--bf-ease) backwards; }
+@keyframes view-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes bf-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.view-enter > div > :not(.kpi-zoom), .view-enter .kpi-zoom > * { animation: bf-rise .42s var(--bf-ease) backwards; }
+.view-enter > div > :nth-child(1) { animation-delay: 0ms; }
+.view-enter > div > :nth-child(2) { animation-delay: 55ms; }
+.view-enter > div > :nth-child(3) { animation-delay: 110ms; }
+.view-enter > div > :nth-child(4) { animation-delay: 165ms; }
+.view-enter > div > :nth-child(5) { animation-delay: 220ms; }
+.view-enter > div > :nth-child(6) { animation-delay: 275ms; }
+.view-enter > div > :nth-child(7) { animation-delay: 330ms; }
+.view-enter .kpi-zoom > :nth-child(1) { animation-delay: 60ms; }
+.view-enter .kpi-zoom > :nth-child(2) { animation-delay: 105ms; }
+.view-enter .kpi-zoom > :nth-child(3) { animation-delay: 150ms; }
+.view-enter .kpi-zoom > :nth-child(4) { animation-delay: 195ms; }
+.view-enter .kpi-zoom > :nth-child(5) { animation-delay: 240ms; }
+.view-enter .kpi-zoom > :nth-child(6) { animation-delay: 285ms; }
+.view-enter .kpi-zoom > :nth-child(7) { animation-delay: 330ms; }
+.view-enter .kpi-zoom > :nth-child(8) { animation-delay: 375ms; }
+
+/* the table's first rows slide in softly; hovering a row fades its shade */
+@media screen {
+  main table tbody tr:nth-child(-n+14):not(:has(> td[colspan])) { animation: bf-row-in .34s var(--bf-ease) backwards; }
+  main table tbody tr:nth-child(2) { animation-delay: 22ms; }
+  main table tbody tr:nth-child(3) { animation-delay: 44ms; }
+  main table tbody tr:nth-child(4) { animation-delay: 66ms; }
+  main table tbody tr:nth-child(5) { animation-delay: 88ms; }
+  main table tbody tr:nth-child(6) { animation-delay: 110ms; }
+  main table tbody tr:nth-child(7) { animation-delay: 132ms; }
+  main table tbody tr:nth-child(8) { animation-delay: 154ms; }
+  main table tbody tr:nth-child(9) { animation-delay: 176ms; }
+  main table tbody tr:nth-child(10) { animation-delay: 198ms; }
+  main table tbody tr:nth-child(11) { animation-delay: 220ms; }
+  main table tbody tr:nth-child(12) { animation-delay: 242ms; }
+  main table tbody tr:nth-child(13) { animation-delay: 264ms; }
+  main table tbody tr:nth-child(14) { animation-delay: 286ms; }
+  main table tbody td { transition: background-color .16s ease; }
+}
+@keyframes bf-row-in { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+
+/* toasts and the sign-in form */
+.toast-in { animation: toast-in .34s var(--bf-spring) both; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: none; } }
+.login-in { animation: bf-rise .65s var(--bf-ease) .06s backwards; }
+
+/* dialogs land with a small overshoot */
+.modal-panel { animation-duration: .42s; animation-timing-function: var(--bf-spring); }
+
+
+/* colour-theme tiles (Settings): lift on hover, pop when chosen */
+.theme-swatch { transition: transform .22s var(--bf-ease), box-shadow .25s ease, border-color .2s ease, background-color .2s ease; }
+.theme-swatch:hover { transform: translateY(-2px); box-shadow: 0 10px 22px -12px rgba(15, 23, 42, .35); }
+.theme-swatch:active { transform: scale(.97); }
+.theme-swatch[aria-checked="true"] { animation: swatch-pop .3s var(--bf-spring); }
+@keyframes swatch-pop { 0% { transform: scale(.95); } 55% { transform: scale(1.04); } 100% { transform: scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .view-enter, .view-enter > div > :not(.kpi-zoom), .view-enter .kpi-zoom > *, .toast-in, .login-in, .theme-swatch, main table tbody tr, .num-in, .bf-ripple, .icon-swap, .form-input[aria-invalid="true"] { animation: none !important; transition: none !important; }
+  html.theme-fade, html.theme-fade * { transition: none !important; }
+}
+
+/* =============================================================================================================
+   Micro-interactions. Timings follow NN/g and Material guidance: feedback 100-150 ms, small pop-overs 150 ms, dialogs 300 ms,
+   entering a little slower than leaving, ease-out for things that arrive, never linear, transform and opacity only.
+   ============================================================================================================= */
+
+/* Buttons: colour and shadow answer at once (120 ms); the press is a firm 2 % squeeze; no hover jump */
+.btn { transition: background-color var(--t-fast) ease, border-color var(--t-fast) ease, color var(--t-fast) ease, box-shadow var(--t-base) ease, transform var(--t-fast) var(--bf-out); position: relative; overflow: hidden; }
+.btn:not(:disabled):hover { transform: none; }
+.btn:not(:disabled):active { transform: scale(.98); transition-duration: 60ms; }
+.btn > svg:first-child { transition: transform var(--t-base) var(--bf-out); }
+.btn:not(:disabled):hover > svg:first-child { transform: scale(1.06); }
+.chip, .seg-btn, .btn-act, [data-ripple] { position: relative; overflow: hidden; }
+.chip, .btn-act { transition-duration: var(--t-fast), var(--t-fast), var(--t-fast), var(--t-base), var(--t-fast); }
+.bf-press:not(:disabled):active { transform: scale(.94); transition: transform 60ms var(--bf-out); }
+
+/* Press ripple (see src/theme/micro.ts): soft, from the exact point of the click */
+.bf-ripple { position: absolute; border-radius: 9999px; background: currentColor; opacity: .14; pointer-events: none; transform: scale(0);
+  animation: bf-ripple .5s var(--bf-out) forwards; }
+@keyframes bf-ripple { to { transform: scale(1); opacity: 0; } }
+
+/* Pop-overs and menus: small, quick, from their anchor (dialogs keep their own larger entrance) */
+.animate-pop { animation: bf-menu .15s var(--bf-out) both; transform-origin: top center; }
+@keyframes bf-menu { from { opacity: 0; transform: translateY(-4px) scale(.97); } to { opacity: 1; transform: none; } }
+
+/* Fields: the focus ring eases out from the border; an invalid field gives one short shake */
+.form-input, .form-select { transition: border-color var(--t-fast) ease, box-shadow var(--t-base) var(--bf-out), background-color var(--t-fast) ease; }
+.form-input[aria-invalid="true"], .form-input.is-invalid { animation: bf-shake .32s cubic-bezier(.36, .07, .19, .97) both; }
+@keyframes bf-shake { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); } 30%, 50%, 70% { transform: translateX(-3px); } 40%, 60% { transform: translateX(3px); } }
+
+/* Switches: the knob springs across, the track changes colour in step */
+[role="switch"], .bf-switch { transition: background-color var(--t-base) ease, box-shadow var(--t-fast) ease; }
+[role="switch"] > span, .bf-knob { transition: transform .26s var(--bf-spring) !important; }
+[role="switch"]:not(:disabled):active > span { transform-origin: center; filter: brightness(.96); }
+
+/* Checkboxes: a drawn tick instead of the browser's, 140 ms */
+input[type="checkbox"]:not([role="switch"]) {
+  -webkit-appearance: none; appearance: none; flex-shrink: 0; width: 1rem; height: 1rem; border-radius: .25rem; cursor: pointer;
+  border: 1.5px solid #94a3b8; background: #fff center / 0 0 no-repeat; display: inline-grid; place-content: center;
+  transition: background-color var(--t-fast) ease, border-color var(--t-fast) ease, box-shadow var(--t-fast) ease, transform var(--t-fast) var(--bf-out);
+}
+.dark input[type="checkbox"]:not([role="switch"]) { background-color: rgb(var(--nt-101b21)); border-color: rgb(var(--nt-3a5463)); }
+input[type="checkbox"]:not([role="switch"]):hover:not(:disabled) { border-color: rgb(var(--ac-600)); }
+input[type="checkbox"]:not([role="switch"]):active:not(:disabled) { transform: scale(.88); }
+input[type="checkbox"]:not([role="switch"]):checked, input[type="checkbox"]:not([role="switch"]):indeterminate {
+  background-color: rgb(var(--ac-600)); border-color: rgb(var(--ac-600));
+}
+input[type="checkbox"]:not([role="switch"])::after { content: ''; width: .62rem; height: .62rem; background: #fff; transform: scale(0); transition: transform .16s var(--bf-spring);
+  clip-path: polygon(14% 52%, 0 66%, 36% 100%, 100% 22%, 86% 8%, 36% 72%); }
+input[type="checkbox"]:not([role="switch"]):checked::after { transform: scale(1); }
+input[type="checkbox"]:not([role="switch"]):indeterminate::after { transform: scale(1); clip-path: polygon(0 40%, 100% 40%, 100% 62%, 0 62%); }
+input[type="checkbox"]:not([role="switch"]):focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(var(--ring), .35); }
+input[type="checkbox"]:not([role="switch"]):disabled { opacity: .5; cursor: not-allowed; }
+
+/* Icon swap (sun <-> moon): the new icon turns in */
+.icon-swap { animation: icon-swap .3s var(--bf-out) both; }
+@keyframes icon-swap { from { opacity: 0; transform: rotate(-70deg) scale(.55); } to { opacity: 1; transform: none; } }
+
+/* Figures settle in with a light fade (the count itself is in CountText) */
+.num-in { display: inline-block; animation: num-in .32s var(--bf-out) backwards; }
+@keyframes num-in { from { opacity: .35; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+/* Cards that can be clicked: a small lift on hover, a small press */
+button.card-base:not(:disabled), a.card-base { transition: box-shadow var(--t-base) ease, transform var(--t-base) var(--bf-out), border-color var(--t-fast) ease; }
+button.card-base:not(:disabled):active { transform: scale(.99); transition-duration: 60ms; }
+
+/* Sidebar: a smaller nudge on hover */
+.nav-item:not(.nav-item-active):hover { transform: translateX(2px); }
+
+/* Skeletons shimmer instead of blinking */
+.animate-pulse { animation: bf-skeleton 1.6s ease-in-out infinite; }
+@keyframes bf-skeleton { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+
+/* =============================================================================================================
+   Homio Essentials design tokens (from the design canvas, hm.css v2): peach accent, kingdom and status colours,
+   Latin names in Newsreader italic, soft tiles and badges. Day values first, night values under .dark.
+   ============================================================================================================= */
+:root {
+  --hm-ink: #0F2B2C; --hm-ink2: #44605F; --hm-ink3: #566E6D; --hm-line: #D3E3E0; --hm-sf2: #E9F4F2; --hm-sf3: #D8EAE7;
+  --hm-pe: #FFE3D8; --hm-peink: #7B2D17; --hm-co: #E4694A;
+  --hm-am: #FFF3DC; --hm-amink: #7A4B00; --hm-dg: #FDE8E6; --hm-dgink: #9B2318; --hm-ok: #E1F2E6; --hm-okink: #1F6B3A; --hm-info: #E4ECF8; --hm-infoink: #31528A;
+  --k-plant: #E1F2E6; --k-plant-ink: #1F6B3A; --k-mineral: #E4ECF8; --k-mineral-ink: #31528A; --k-animal: #F7E9DA; --k-animal-ink: #7D4A1B;
+  --k-nosode: #ECE6F7; --k-nosode-ink: #5B3F94; --k-sarcode: #FBEFC4; --k-sarcode-ink: #6B5200; --k-other: #E9F4F2; --k-other-ink: #0A4A4C;
+  --hero1: #0B5557; --hero2: #1B8077;
+}
+.dark {
+  --hm-ink: #E7F3F1; --hm-ink2: #B0C8C5; --hm-ink3: #92ADAA; --hm-line: #29484A; --hm-sf2: #1A3234; --hm-sf3: #244244;
+  --hm-pe: #3B2319; --hm-peink: #FFD2C0; --hm-co: #FF8A6B;
+  --hm-am: #35290F; --hm-amink: #FFD58A; --hm-dg: #3A1C19; --hm-dgink: #FFB4AB; --hm-ok: #1B3524; --hm-okink: #9ADBAF; --hm-info: #1E2E48; --hm-infoink: #A9C7FF;
+  --k-plant: #1B3524; --k-plant-ink: #9ADBAF; --k-mineral: #1E2E48; --k-mineral-ink: #A9C7FF; --k-animal: #3A2A18; --k-animal-ink: #F0C08F;
+  --k-nosode: #2C2342; --k-nosode-ink: #CDB8FF; --k-sarcode: #3A3210; --k-sarcode-ink: #F2DC85; --k-other: #1A3234; --k-other-ink: #9BE3DD;
+  --hero1: #08393B; --hero2: #136D68;
+}
+
+/* Latin remedy names: Newsreader italic, the archive's signature */
+.lat { font-family: 'Newsreader', Georgia, serif; font-style: italic; font-weight: 500; letter-spacing: 0; }
+
+/* Badges: soft pills */
+.hm-badge { display: inline-flex; align-items: center; gap: .35rem; height: 1.45rem; padding: 0 .6rem; border-radius: 999px; font-size: .7rem; font-weight: 700; white-space: nowrap; line-height: 1;
+  background: rgb(var(--ac-100)); color: rgb(var(--ac-800)); }
+.dark .hm-badge { background: rgb(var(--ac-400) / .14); color: rgb(var(--ac-200)); }
+.hm-badge .dot { width: .4rem; height: .4rem; border-radius: 99px; background: currentColor; }
+.k-plant { background: var(--k-plant) !important; color: var(--k-plant-ink) !important; }
+.k-mineral { background: var(--k-mineral) !important; color: var(--k-mineral-ink) !important; }
+.k-animal { background: var(--k-animal) !important; color: var(--k-animal-ink) !important; }
+.k-nosode { background: var(--k-nosode) !important; color: var(--k-nosode-ink) !important; }
+.k-sarcode { background: var(--k-sarcode) !important; color: var(--k-sarcode-ink) !important; }
+.k-imponderabilia, .k-other { background: var(--k-other) !important; color: var(--k-other-ink) !important; }
+.s-pend { background: var(--hm-am) !important; color: var(--hm-amink) !important; }
+.s-ok { background: var(--hm-ok) !important; color: var(--hm-okink) !important; }
+.s-rej { background: var(--hm-dg) !important; color: var(--hm-dgink) !important; }
+.s-info { background: var(--hm-info) !important; color: var(--hm-infoink) !important; }
+.s-draft { background: var(--hm-sf3) !important; color: var(--hm-ink2) !important; }
+.s-peach { background: var(--hm-pe) !important; color: var(--hm-peink) !important; }
+
+/* Letter tiles (remedy initial, brand short name) */
+.hm-tile { width: 2.5rem; height: 2.5rem; border-radius: .75rem; display: inline-flex; align-items: center; justify-content: center; flex: none;
+  font-weight: 800; font-size: 1rem; background: rgb(var(--ac-100)); color: rgb(var(--ac-800)); }
+.dark .hm-tile { background: rgb(var(--ac-400) / .14); color: rgb(var(--ac-200)); }
+.hm-tile.sm { width: 2rem; height: 2rem; border-radius: .6rem; font-size: .8rem; }
+.hm-tile.lg { width: 3.5rem; height: 3.5rem; border-radius: 1rem; font-size: 1.4rem; }
+
+/* Progress bars (content health) */
+.hm-bar { height: .5rem; border-radius: 999px; background: var(--hm-sf3); overflow: hidden; }
+.hm-bar > i { display: block; height: 100%; border-radius: 999px; background: rgb(var(--ac-600)); transform-origin: left center; animation: bar-grow .9s var(--bf-ease) both; }
+.dark .hm-bar > i { background: rgb(var(--ac-400)); }
+.hm-bar > i.warn { background: var(--hm-co); }
+@keyframes bar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Callouts */
+.hm-callout { display: flex; gap: .75rem; border-radius: 1rem; padding: .85rem 1rem; font-size: .8rem; line-height: 1.5; }
+.hm-callout b { font-weight: 800; }
+.hm-callout.warn { background: var(--hm-am); color: var(--hm-amink); }
+.hm-callout.danger { background: var(--hm-dg); color: var(--hm-dgink); }
+.hm-callout.ok { background: var(--hm-ok); color: var(--hm-okink); }
+.hm-callout.note { background: rgb(var(--ac-50)); color: rgb(var(--ac-800)); border: 1px solid rgb(var(--ac-200)); }
+.dark .hm-callout.note { background: rgb(var(--ac-400) / .1); color: rgb(var(--ac-200)); border-color: rgb(var(--ac-400) / .25); }
+
+/* Hero gradient (sign-in brand panel, dashboard greeting) */
+.hm-hero { background: linear-gradient(140deg, var(--hero1) 0%, var(--hero2) 100%); color: #fff; }
+
+/* Request queue items */
+.rq-item { display: flex; flex-direction: column; gap: .4rem; padding: .8rem 1rem; border-bottom: 1px solid var(--hm-line); text-align: left; width: 100%;
+  transition: background-color .16s ease, box-shadow .2s ease; }
+.rq-item:hover { background: rgb(var(--ac-50)); }
+.dark .rq-item:hover { background: rgb(var(--ac-400) / .06); }
+.rq-item[aria-selected="true"] { background: rgb(var(--ac-100) / .7); box-shadow: inset 3px 0 0 rgb(var(--ac-600)); }
+.dark .rq-item[aria-selected="true"] { background: rgb(var(--ac-400) / .12); box-shadow: inset 3px 0 0 rgb(var(--ac-400)); }
+
+/* Switch (bondhu-fund's spring knob, Homio colours) */
+.hm-switch { position: relative; width: 2.6rem; height: 1.5rem; border-radius: 999px; background: #c3ced8; flex: none; cursor: pointer; }
+.hm-switch[aria-checked="true"] { background: rgb(var(--ac-600)); }
+.dark .hm-switch { background: rgb(var(--nt-3a5463)); }
+.dark .hm-switch[aria-checked="true"] { background: rgb(var(--ac-500)); }
+.hm-switch > span { position: absolute; top: .1875rem; left: .1875rem; width: 1.125rem; height: 1.125rem; border-radius: 999px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.hm-switch[aria-checked="true"] > span { transform: translateX(1.1rem); }
+.hm-switch:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Banner preview frame (promotions) */
+.promo-frame { aspect-ratio: 16 / 7; border-radius: .9rem; overflow: hidden; background: repeating-linear-gradient(45deg, var(--hm-sf2) 0 10px, var(--hm-sf3) 10px 20px); }
+.promo-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Tag input chips */
+.tag-chip { display: inline-flex; align-items: center; gap: .25rem; height: 1.6rem; padding: 0 .35rem 0 .6rem; border-radius: 999px; font-size: .72rem; font-weight: 700;
+  background: rgb(var(--ac-100)); color: rgb(var(--ac-800)); animation: chip-pop .25s var(--bf-ease); }
+.dark .tag-chip { background: rgb(var(--ac-400) / .15); color: rgb(var(--ac-200)); }
+.tag-chip button { width: 1.1rem; height: 1.1rem; display: inline-grid; place-items: center; border-radius: 99px; }
+.tag-chip button:hover { background: rgba(0,0,0,.08); }
+
+@media (prefers-reduced-motion: reduce) { .hm-bar > i, .tag-chip { animation: none !important; } }

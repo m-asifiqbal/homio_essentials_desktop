@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-electron/
+release/
+*.log
+.DS_Store
+Thumbs.db
+
+# server address + public anon key (written by scripts/app-env.mjs in the backend repo)
+config/supabase.json
+.env
+.env.*

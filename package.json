@@ -1,0 +1,72 @@
+{
+  "name": "homio-essentials-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Homio Essentials Admin - content, requests, promotions and backups for the Homio Essentials app",
+  "author": "Homio Essentials",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:electron": "tsc -p tsconfig.electron.json --noEmit && node scripts/bundle-electron.js",
+    "build:all": "npm run build && npm run build:electron",
+    "electron:dev": "npm run build:electron && concurrently -k \"vite\" \"wait-on tcp:5173 && cross-env NODE_ENV=development ELECTRON_RUN_AS_NODE= electron .\"",
+    "start": "cmd /c \"set ELECTRON_RUN_AS_NODE=&& node_modules\\electron\\dist\\electron.exe .\"",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.electron.json --noEmit",
+    "test:smoke": "node scripts/run-smoke.js",
+    "dist": "npm run build:all && electron-builder --win nsis portable --x64",
+    "dist:dir": "npm run build:all && electron-builder --win --dir"
+  },
+  "build": {
+    "appId": "com.homio.essentials.admin",
+    "productName": "Homio Essentials Admin",
+    "copyright": "Copyright (c) 2026 Homio Essentials",
+    "directories": { "output": "release", "buildResources": "build" },
+    "files": ["dist/**/*", "dist-electron/**/*", "package.json", "!dist-electron/**/*.map", "build/icon.ico", "!node_modules/**/*"],
+    "asar": true,
+    "compression": "maximum",
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [{ "target": "nsis", "arch": ["x64"] }, { "target": "portable", "arch": ["x64"] }],
+      "artifactName": "HomioAdmin-Windows-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "Homio Essentials Admin",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "HomioAdmin-Setup-${version}.exe"
+    },
+    "portable": { "artifactName": "HomioAdmin-Portable-${version}.exe" },
+    "electronVersion": "35.7.5",
+    "electronLanguages": ["en-US", "bn"]
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@fontsource/hind-siliguri": "^5.1.0",
+    "@fontsource/newsreader": "^5.1.0",
+    "@fontsource/plus-jakarta-sans": "^5.1.0",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "35.7.5",
+    "electron-builder": "^26.0.12",
+    "esbuild": "^0.21.5",
+    "lucide-react": "^0.460.0",
+    "postcss": "^8.4.47",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2",
+    "wait-on": "^7.2.0"
+  }
+}
